@@ -1,117 +1,74 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * Generated with the TypeScript template
- * https://github.com/react-native-community/react-native-template-typescript
- *
- * @format
- */
-
-import React, {type PropsWithChildren} from 'react';
+import React, { useState, type PropsWithChildren } from 'react';
 import {
+  FlatList,
   SafeAreaView,
-  ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
-  useColorScheme,
+  TouchableOpacity,
   View,
 } from 'react-native';
-
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
-const Section: React.FC<
-  PropsWithChildren<{
-    title: string;
-  }>
-> = ({children, title}) => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
+import Realm, { BSON } from "realm";
+import { addBook, deleteAllBooks, getAllBooks, updateAllBookEditions } from "./src/store/databases";
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Button } from '@rneui/base';
 
 const App = () => {
-  const isDarkMode = useColorScheme() === 'dark';
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+  // In our page, add the state with default state from our getAllBooks function.
+  const [data, setData] = useState(getAllBooks());
+
+  // for (let i = 0; i < 3; i++) {
+  //   realm.write(() => {
+  //     const book = realm.create('Book', {
+  //       title: 'Barry Butter' + i,
+  //       pages: 400
+  //     });
+  //   });
+  // }
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <SafeAreaProvider style={style.container}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+        <Button title="Add Book" style={{ paddingVertical: 8}}
+          onPress={() => {
+            // Add a book with a random number of pages called "Chronicles of JavaScript"
+            addBook("Chronicles of JavaScript", Math.floor(Math.random() * 500))
+            setData(getAllBooks())
+          }}/>
+
+        <Button title={"update book"} style={{ paddingVertical: 8 }}
+          onPress={() => {
+            updateAllBookEditions()
+            setData(getAllBooks())
+          }}/>
+
+        <Button title={"delete all book"} style={{ paddingVertical: 8 }}
+          onPress={() => {
+            deleteAllBooks()
+            setData(getAllBooks())
+          }}/>
+      </View>
+      <FlatList
+        data={data}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={({ item, index }) => {
+          return (
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <Text>{item.title}</Text>
+              <Text>{item.pages}</Text>
+              <Text>{item.edition === null ? 'null' : item.edition}</Text>
+            </View>
+          )
+        }} />
+    </SafeAreaProvider>
   );
 };
 
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
+const style = StyleSheet.create({
+  container:{
+    flex:1,
+    padding:20
+  }
+})
 
 export default App;
